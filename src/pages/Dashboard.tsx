@@ -1,63 +1,186 @@
-import Sidebar from "../components/Sidebar";
-import Topbar from "../components/Topbar";
-import StatCard from "../components/StatCard";
-import PortfolioChart from "../components/PortfolioChart";
-import { usePortfolio } from "../hooks/usePortfolio";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import GlassCard from "../components/GlassCard";
+import PageWrapper from "../components/PageWrapper";
+import { Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import RecentTransactions from "../components/RecentTransactions";
 
+interface Stock {
+  symbol: string;
+  price: number;
+}
 
-export default function Dashboard() {
+const symbols = ["AAPL", "MSFT", "GOOGL"];
 
-  console.log("DASHBOARD LOADED");
+export default function Market() {
+  const [stocks, setStocks] = useState<Stock[]>([]);
+  const [search, setSearch] = useState("");
+  const navigate = useNavigate();
 
-  const { data, loading } = usePortfolio();
-
-  console.log("loading =", loading);
-  console.log("data =", data);
-
-  const portfolioData = data as {
-    currentPrice: number;
-    quantity: number;
-    pnl: number;
-  }[];
-
-  const portfolioValue =
-    portfolioData?.reduce(
-      (sum, item) => sum + item.currentPrice * item.quantity,
-      0,
-    ) ?? 0;
-
-  const totalPnl = portfolioData?.reduce((sum, item) => sum + item.pnl, 0) ?? 0;
-
-
-  if (loading) {
-    return (
-      <div className="flex bg-[#071120] min-h-screen">
-        <Sidebar />
-        <div className="ml-72 flex-1 p-8">
-          <Topbar />
-          <div className="text-white">Loading...</div>
-        </div>
-      </div>
-    );
+  const handleSearch = () => {
+    if(!search.trim()) return;
+    navigate(`/market?symbol=${search.toUpperCase()}`)
   }
 
+  useEffect(() => {
+    loadPrices();
+
+    const timer = setInterval(loadPrices, 30000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const loadPrices = async () => {
+    const result = await Promise.all(
+      symbols.map(async (symbol) => {
+        const res = await axios.get(
+          `http://localhost:9090/basket/price?symbol=${symbol}`,
+        );
+
+        return {
+          symbol,
+          price: res.data,
+        };
+      }),
+    );
+
+    setStocks(result);
+  };
+
+  const filtered = stocks.filter((s) =>
+    s.symbol.toLowerCase().includes(search.toLowerCase()),
+  );
+
   return (
-    <div className="flex bg-[#071120] min-h-screen">
-      <Sidebar />
-      <div className="ml-72 flex-1 p-8">
-        <Topbar />
-        <div className="grid grid-cols-3 gap-6 mb-6">
-          <StatCard
-            title="Portfolio Value"
-            value={`$${portfolioValue.toFixed(2)}`}
-            change="Live"
+    <PageWrapper>
+      <div className="p-10 text-white">
+        <h1
+          className="
+          text-5xl
+          font-bold
+          mb-10
+          bg-gradient-to-r
+          from-yellow-300
+          to-white
+          bg-clip-text
+          text-transparent
+        "
+        >
+          Live Market
+        </h1>
+
+        <div
+          className="
+          flex items-center
+          gap-4
+          mb-10
+
+          rounded-2xl
+          bg-white/5
+          backdrop-blur-xl
+
+          border border-white/10
+
+          p-4
+        "
+        >
+          <Search className="text-yellow-400" />
+
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search AAPL, MSFT..."
+            className="
+              bg-transparent
+              outline-none
+              w-full
+            "
           />
-          <StatCard title="Cash Balance" value="$4,200" change="+1.2%" />
-          <StatCard title="PnL" value={`$${totalPnl.toFixed(2)}`} change="Live" />
+
+          <button onClick={handleSearch}>
+            Search
+          </button>
         </div>
 
-        <PortfolioChart />
+        <div
+          className="
+          grid
+          grid-cols-1
+          md:grid-cols-3
+          gap-8
+        "
+        >
+          {filtered.map((stock) => (
+            <GlassCard key={stock.symbol}>
+              <h2
+                className="
+                text-3xl
+                font-bold
+                text-yellow-400
+              "
+              >
+                {stock.symbol}
+              </h2>
+
+              <p
+                className="
+                text-4xl
+                mt-5
+                font-bold
+              "
+              >
+                ${stock.price}
+              </p>
+
+              <div
+                className="
+                flex gap-4 mt-8
+              "
+              >
+                <button
+                  className="
+                    flex-1
+
+                    bg-green-500
+                    hover:bg-green-600
+
+                    rounded-xl
+
+                    py-3
+
+                    font-bold
+
+                    transition
+                  "
+                >
+                  Buy
+                </button>
+
+                <button
+                  className="
+                    flex-1
+
+                    bg-red-500
+                    hover:bg-red-600
+
+                    rounded-xl
+
+                    py-3
+
+                    font-bold
+
+                    transition
+                  "
+                >
+                  Sell
+                </button>
+              </div>
+            </GlassCard>
+          ))}
+        </div>
       </div>
-    </div>
+      <RecentTransactions/>
+    </PageWrapper>
   );
 }

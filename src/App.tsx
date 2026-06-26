@@ -1,64 +1,37 @@
-import './App.css'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard'
-import Automation from './pages/Automation';
-import Trading from './pages/Trading';
-import Portfolio from './pages/Portfolio';
-import Transactions from './pages/Transactions';
-
-import ProtectedRoute from './routes/ProtectedRoute';
+import Navbar from "./components/Navbar";
+import AnimatedBackground from "./components/AnimatedBackground";
+import Dashboard from "./pages/Dashboard";
+import Market from "./pages/Market";
+import Portfolio from "./pages/Portfolio";
+import Trade from "./pages/Trade";
+import Basket  from "./pages/Basket";
+import Automation from "./pages/Automation";
+import StockTicker from "./components/StockTicker";
 
 function App() {
   return (
     <BrowserRouter>
+    <AnimatedBackground/>
+    <StockTicker/>
+      <Navbar />
+      
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/automation"
-          element={
-            <ProtectedRoute>
-              <Automation />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/trading"
-          element={
-            <ProtectedRoute>
-              <Trading />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/portfolio"
-          element={
-            <ProtectedRoute>
-              <Portfolio />
-            </ProtectedRoute>
-          }
-        />
-      <Route
-        path="/transactions"
-        element={
-          <ProtectedRoute>
-            <Transactions />
-          </ProtectedRoute>
-        }
-        />
+        <Route path="/" element={<Dashboard />} />
+
+        <Route path="/market" element={<Market />} />
+
+        <Route path="/portfolio" element={<Portfolio />} />
+
+        <Route path="/trade" element={<Trade />} />
+
+        <Route path="/basket" element={<Basket />} />
+
+        <Route path="/automation" element={<Automation />} />
       </Routes>
     </BrowserRouter>
   );
 }
 
-export default App
+export default App;

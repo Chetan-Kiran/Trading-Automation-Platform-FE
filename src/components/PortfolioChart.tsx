@@ -1,41 +1,24 @@
-import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 const data = [
-  { day: "Mon", value: 10000 },
-  { day: "Tue", value: 11000 },
-  { day: "Wed", value: 10500 },
-  { day: "Thu", value: 13000 },
-  { day: "Fri", value: 15000 },
+  { name: "AAPL", value: 60 },
+  { name: "MSFT", value: 25 },
+  { name: "GOOGL", value: 15 },
 ];
+
+const COLORS = ["#FFD700", "#00C2FF", "#4ADE80"];
 
 export default function PortfolioChart() {
   return (
-    <div
-      className="
-      bg-white/5
-      backdrop-blur-xl
-      rounded-3xl
-      p-6
-      border
-      border-white/10
-      h-[400px]
-      "
-    >
-      <h2 className="text-white text-xl mb-6">Portfolio Growth</h2>
-
-      <ResponsiveContainer width="100%" height= {300}>
-        <AreaChart data={data}>
-          <XAxis dataKey="day" />
-          <Tooltip />
-
-          <Area
-            type="monotone"
-            dataKey="value"
-            stroke="#D4AF37"
-            fill="#D4AF37"
-            fillOpacity={0.2}
-          />
-        </AreaChart>
+    <div className="h-[400px]">
+      <ResponsiveContainer>
+        <PieChart>
+          <Pie data={data} dataKey="value" outerRadius={130}>
+            {data.map((_, index) => (
+              <Cell key={index} fill={COLORS[index]} />
+            ))}
+          </Pie>
+        </PieChart>
       </ResponsiveContainer>
     </div>
   );
